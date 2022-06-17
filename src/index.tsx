@@ -1,6 +1,13 @@
-import React from 'react'
-import { render } from 'react-dom'
+import React from 'react';
+import { render } from 'react-dom';
 
-const element = <button>Hello, world!</button>
+import { BrowserRouter } from 'react-router-dom';
+import { App } from './App';
+
+const element = (
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+)
 
 render(element, document.querySelector('#app'))

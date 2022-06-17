@@ -1,60 +1,61 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const { resolve } = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserWebpackPlugin = require("terser-webpack-plugin");
 
-const isDev = process.env.NODE_ENV !== 'production'
+const isProd = process.env.NODE_ENV === "production";
 
 const config = {
-  entry: ['babel-polyfill', './src/index.tsx'],
+  mode: isProd ? "production" : "development",
+  entry: {
+    index: "./src/index.tsx",
+  },
   output: {
-    path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js'
+    path: resolve(__dirname, "dist"),
+    filename: "bundle.js",
+  },
+  resolve: {
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
   },
   module: {
     rules: [
       {
-        test: /\.(ts|tsx)$/,
+        test: /\.(ts|js)x?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader'
-        }
+          loader: "babel-loader",
+          options: {
+            presets: [
+              "@babel/preset-env",
+              ["@babel/preset-react", {"runtime": "automatic"}],
+              "@babel/preset-typescript",
+            ],
+          },
+        },
       },
-    ]
-  },
-  resolve: {
-    extensions: ['*', '.js', '.jsx']
-  },
-  devServer: {
-    port: 3000,
-    open: true,
-    historyApiFallback: true,
-    proxy: {
-      '/api': 'http://localhost:8080'
-    }
+    ],
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      template: './public/index.html',
-    })
-  ]
+      template: "./public/index.html",
+      filename: "index.html",
+      inject: "body",
+    }),
+  ],
 };
 
-if (!isDev) {
+if (isProd) {
   config.optimization = {
     minimizer: [new TerserWebpackPlugin()],
   };
-}
-
-if (isDev) {
+} else {
   config.devServer = {
-    port: 9000,
+    port: 3000,
     open: true,
     hot: true,
     compress: true,
-    stats: "errors-only",
-    overlay: true,
+    proxy: {
+      '/api': 'http://localhost:8080'
+    }
   };
 }
 
